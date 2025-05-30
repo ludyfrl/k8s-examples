@@ -59,10 +59,39 @@ We can use spark-submit script in Spark’s bin directory to launch applications
 1. Install Spark on our local as Spark client to submit the job into our K8s cluster.
    ```bash
    # Using Spark 3.5.5
-   curl -LO https://dlcdn.apache.org/spark/spark-3.5.5/spark-3.5.5-bin-hadoop3-scala2.13.tgz
+   curl -LO https:///dlcdn.apache.org/spark/spark-3.5.5/spark-3.5.5-bin-hadoop3-scala2.13.tgz
    tar -xvzf spark-3.5.5-bin-hadoop3-scala2.13.tgz && rm spark-3.5.5-bin-hadoop3-scala2.13.tgz
+
+   # Build local Spark image
+   ${SPARK_HOME}/bin/docker-image-tool.sh -p ${SPARK_HOME}/kubernetes/dockerfiles/spark/bindings/python/Dockerfile build
    ```
-2. *(Optional)* 
+2. Submit Spark job, we can either use client or cluster mode. Notice that when using client mode we can directly upload file in our local storage without bundling it into image. That's because in client mode, the Spark driver actually running in our local machine, not in the K8s cluster.
+   ```bash
+   # Using cluster mode
+   docker build -t {IMAGE_NAME:TAG} ./spark-app/python/word-count/
+   $SPARK_HOME/bin/spark-submit \
+      --master k8s://https://$(minikube ip):8443 \
+      --deploy-mode cluster \
+      --name word-count-spark \
+      --conf spark.kubernetes.container.image={IMAGE_NAME:TAG} \
+      --conf spark.executor.instances=1 \
+      --conf spark.kubernetes.namespace={SPARK_NAMESPACE} \
+      --conf spark.kubernetes.file.upload.path=/tmp \
+      --conf spark.kubernetes.authenticate.driver.serviceAccountName=spark \
+      local:///opt/spark/app/main.py
+   
+   # Using client mode
+   $SPARK_HOME/bin/spark-submit \
+      --master k8s://https://$(minikube ip):8443 \
+      --deploy-mode client \
+      --name simple-df-spark \
+      --conf spark.kubernetes.container.image=spark-py:latest \
+      --conf spark.executor.instances=1 \
+      --conf spark.kubernetes.namespace={SPARK_NAMESPACE} \
+      --conf spark.kubernetes.file.upload.path=/workspaces/spark-on-k8s/tmp \
+      --conf spark.kubernetes.authenticate.driver.serviceAccountName=spark \
+      ./spark-app/python/simple-df/main.py
+   ```
 
 ### Using spark-kubernetes-operator
 1. Install Helm chart for spark-kubernetes-operator.

@@ -1,3 +1,4 @@
 spark-3*/
 *.zip
 *.jar
+tmp/*
