@@ -1,5 +1,4 @@
 from pyspark.sql import SparkSession
-from pyspark import SparkFiles
 
 spark = SparkSession.builder.appName("test-spark-job").getOrCreate()
 
