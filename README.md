@@ -102,13 +102,9 @@ I am using the relatively new [Spark Kubernetes Operator by Apache](https://gith
    ```
 3. Deploy Spark app using Spark K8s Operator
    ```bash
-   kubectl apply -f manifests/word-count-py.yaml
+   kubectl apply -f spark-app/kubernetes/word-count-py.yaml
    ```
 4. Check Spark Application status
    ```bash
    kubectl get sparkapp pyspark-word-count -n spark-app
    ```
-
-### Using Apache Livy
-
-### Using Apache Airflow
