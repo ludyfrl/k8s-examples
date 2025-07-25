@@ -1,0 +1,27 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  namespace: spark-app
+  name: spark-job-manager
+rules:
+- apiGroups: ["sparkoperator.k8s.io"]
+  resources: ["sparkapplications", "sparkapplications/status"]
+  verbs: ["create", "delete", "get", "list", "patch", "update", "watch"]
+- apiGroups: [""]
+  resources: ["pods", "pods/log", "pods/status", "services", "configmaps", "events"]
+  verbs: ["create", "delete", "get", "list", "patch", "update", "watch"]
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: spark-job-manager-binding
+  namespace: spark-app
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: spark-job-manager
+subjects:
+- kind: ServiceAccount
+  name: airflow-worker
+  namespace: airflow
