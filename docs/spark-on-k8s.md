@@ -22,7 +22,6 @@ Spark Jobs can be run within K8s clusters. But there are many ways to submit you
 2. Start Minikube cluster with sufficient resources and enable Docker environment within Minikube.
    ```bash
    minikube start --cpus=4 --memory=8192 --driver=docker
-   eval $(minikube docker-env)
    ```
 3. Create new K8s namespace for your Spark app.
    ```bash
@@ -32,7 +31,11 @@ Spark Jobs can be run within K8s clusters. But there are many ways to submit you
    ```bash
    kubectl apply -f manifests/spark/spark-rbac.yaml
    ```
-
+5. Build docker images for Spark examples
+   ```bash
+   eval $(minikube docker-env)
+   docker build -t pyspark-word-count:latest ./spark-app/python/word-count/
+   ```
 
 ## Submitting Spark Jobs
 There are many ways of submitting Spark jobs into K8s cluster. Below is some of the possible methods.
@@ -52,7 +55,6 @@ We can use spark-submit script in Spark’s bin directory to launch applications
 2. Submit Spark job, we can either use client or cluster mode. Notice that when using client mode we can directly upload file in our local storage without bundling it into image. That's because in client mode, the Spark driver actually running in our local machine, not in the K8s cluster.
    ```bash
    # Using cluster mode
-   docker build -t pyspark-word-count:latest ./spark-app/python/word-count/
    $SPARK_HOME/bin/spark-submit \
       --master k8s://https://$(minikube ip):8443 \
       --deploy-mode cluster \
@@ -127,10 +129,10 @@ I am using [Kubeflow Spark Operator](https://github.com/kubeflow/spark-operator)
    ```
 3. Create PV and PVC for our Airflow dags
    ```bash
-   # Copy DAGs file to Minikube
+   # Copy DAGs file into Minikube
    scp -r -i $(minikube ssh-key) $(pwd)/airflow/ docker@$(minikube ip):/tmp/
 
-   # Create PV and PVC
+   # Create PV and PVC for DAGs file
    kubectl apply -f manifests/airflow/airflow-pv-dags.yaml
    ```
 4. Install Airflow

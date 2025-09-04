@@ -1,0 +1,24 @@
+# Helm values for minio-operator configuration
+#
+# 1. Set replica count to 2
+# 2. Setup anti-affinity rules to prevents a pod from being scheduled onto a node
+#    if there is already a pod with label `name=minio-operator` running on that node
+# 3. Setup tolerations so the pod can be picked up by worker nodes
+# 4. Limit the resources
+operator:
+  replicaCount: 2
+  affinity:
+    podAntiAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        - labelSelector:
+            matchExpressions:
+              - key: app.kubernetes.io/name
+                operator: In
+                values:
+                  - operator
+          topologyKey: kubernetes.io/hostname
+  resources:
+    limits:
+      cpu: 200m
+      memory: 256Mi
+      ephemeral-storage: 500Mi

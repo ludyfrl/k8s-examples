@@ -1,0 +1,29 @@
+tenant:
+  name: iceberg-minio
+  namespace: iceberg-minio
+
+  configSecret:
+    name: minio-config
+    accessKey: minio
+    secretKey: minio123
+
+  pools:
+    - servers: 2
+      name: pool
+      volumesPerServer: 1
+      size: 5Gi
+      nodeSelector:
+        node-role.kubernetes.io/worker-node: 'true'
+      tolerations:
+      - key: dedicated
+        operator: Equal
+        value: worker-node
+        effect: NoSchedule
+
+  mountPath: /export
+  subPath: /data
+  certificate:
+    requestAutoCert: false
+
+console:
+  enabled: true
